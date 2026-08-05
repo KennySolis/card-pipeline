@@ -3,6 +3,22 @@
 Production computer-vision pipeline that takes physical inventory from scan to live
 marketplace listing — built and operated by one person.
 
+## Architecture
+
+```mermaid
+flowchart LR
+    A[Camera station<br/>Raspberry Pi] --> B[Ingest service<br/>Python / Flask]
+    B --> C[Vision read<br/>hosted LLM, multi-provider]
+    C --> D[Reference DB cross-check<br/>20,359 cards, weekly sync]
+    D -->|confirmed| E[Pricing + price receipt]
+    D -->|ambiguous| F[Flagged for review<br/>never guessed]
+    E --> G[eBay listing<br/>Trading API, OAuth]
+    G --> H[QR storage labels<br/>bins tied to listings]
+    W[Watchdog<br/>90s cycle, phone alerts] -.supervises.-> B
+    W -.supervises.-> C
+    W -.supervises.-> G
+```
+
 ## How it works
 
 - A camera station photographs each physical trading card; a Python web service ingests the frame.
@@ -17,6 +33,18 @@ marketplace listing — built and operated by one person.
 - A watchdog supervises all services on a 90-second cycle, auto-restarts failures, and
   pushes phone alerts; the system has run in production since February 2026 with
   1,000+ cards scanned and real orders processed end-to-end.
+
+## Design decisions
+
+- **Multi-provider vision behind one env var** — swapping Gemini for a fallback provider
+  is configuration, not a code change. No single-vendor dependency.
+- **Local reference database instead of per-scan API calls** — card identity data is
+  static, so it is mirrored locally (weekly sync). Scanning works offline and never
+  blocks on a third-party outage.
+- **Flag, never guess** — when a vision read is ambiguous against the reference DB, the
+  card is queued for human review instead of silently picking a candidate.
+- **Price receipts** — every price is emitted as a deterministic receipt object (inputs,
+  method, range, confidence), so the number can be audited after the fact.
 
 ## Tech stack
 
