@@ -1,0 +1,17 @@
+# secrets & credentials — never committed
+.env
+.env.*
+*.key
+*.pem
+credentials*
+token*
+secrets*
+
+# runtime
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.db
+*.sqlite
+logs/
