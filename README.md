@@ -55,4 +55,10 @@ PowerShell + Task Scheduler ops · Raspberry Pi camera station
 ## Status
 
 Sanitized public overview of a private production system that runs daily.
-Implementation details are private — walkthrough available on request.
+Most implementation stays private — but `watchdog/watchdog.ps1` is the real
+production supervision pattern (transition-only alerting, per-service relaunch
+with cold-start bind waits, phone alerts), sanitized to a generic config. For
+more real code, see the companion repo
+[fleet](https://github.com/KennySolis/fleet): the full dispatcher that
+schedules work across my machines. Implementation walkthrough available on
+request.
