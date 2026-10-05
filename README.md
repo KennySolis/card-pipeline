@@ -46,6 +46,28 @@ flowchart LR
 - **Price receipts** — every price is emitted as a deterministic receipt object (inputs,
   method, range, confidence), so the number can be audited after the fact.
 
+## Repo layout
+
+| path | role |
+|---|---|
+| `app/main.py` | Flask service entrypoint: camera ingest and operator UI |
+| `pipeline/capture.py` | camera capture and frame ingestion |
+| `pipeline/identify.py` | vision read plus reference DB cross-check |
+| `pipeline/price.py` | market pricing and price receipts |
+| `pipeline/list.py` | eBay listing lifecycle and QR storage labels |
+| `watchdog/watchdog.ps1` | **real code**: the production service watchdog |
+| `tests/test_pipeline.py` | integration and regression tests |
+
+Everything except the watchdog is a placeholder; the implementations stay private.
+
+### Running the watchdog
+
+`watchdog.ps1` needs **PowerShell 7+** (`pwsh`). It uses the `??` null-coalescing
+operator, which Windows PowerShell 5.1 (`powershell.exe`) cannot parse, so a
+scheduled task must call `pwsh.exe`, not `powershell.exe`. Optional settings come
+from the environment: `WATCHDOG_PYTHON` (Python executable) and
+`WATCHDOG_NTFY_TOPIC` (phone alerts; empty means log only).
+
 ## Tech stack
 
 Python · Flask · hosted vision LLM APIs (Google Gemini + fallback providers) ·
